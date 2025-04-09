@@ -1,0 +1,26 @@
+name: Update Changelog
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Update Changelog Entry
+        run: |
+          echo "### Version $(date +'%Y.%m.%d')" >> CHANGELOG.md
+          echo "- Commit: ${{ github.event.head_commit.message }}" >> CHANGELOG.md
+          echo "- Author: ${{ github.actor }}" >> CHANGELOG.md
+
+      - name: Commit & Push Changelog Updates
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add CHANGELOG.md
+          git commit -m "Auto-update changelog for new commit"
+          git push
