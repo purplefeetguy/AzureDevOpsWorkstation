@@ -16,8 +16,8 @@ jobs:
       - name: Get Current Version
         id: get_version
         run: |
-          # Read the current version from the CHANGELOG.md file (assuming the version is listed at the top)
-          version=$(head -n 1 CHANGELOG.md | grep -oP '\d+\.\d+\.\d+')
+          # Read the current version from the changelog/CHANGELOG.md file (assuming the version is listed at the top)
+          version=$(head -n 1 changelog/CHANGELOG.md | grep -oP '\d+\.\d+\.\d+')
           echo "Current version is $version"
           echo "version=$version" >> $GITHUB_ENV
 
@@ -62,12 +62,12 @@ jobs:
           echo "New version: $new_version"
 
           # Update version in CHANGELOG.md
-          sed -i "1s/.*/$new_version/" CHANGELOG.md
+          sed -i "1s/.*/$new_version/" changelog/CHANGELOG.md
 
       - name: Commit & Push Changes
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          git add CHANGELOG.md
+          git add changelog/CHANGELOG.md
           git commit -m "Auto-update changelog for version $new_version"
           git push origin ${{ github.ref }}
