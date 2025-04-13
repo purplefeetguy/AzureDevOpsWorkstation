@@ -1,0 +1,43 @@
+name: Dynamic Changelog Versioning
+
+on:
+  push:
+    branches:
+      - '**'  # This will trigger on any branch
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set Up Git Config
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+      - name: Capture Commit Message and Branch Info
+        id: changelog_info
+        run: |
+          BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+          COMMIT_MESSAGE="${{ github.event.head_commit.message }}"
+          AUTHOR="${{ github.actor }}"
+          DATE=$(date +'%Y-%m-%d')
+          echo "::set-output name=branch_name::$BRANCH_NAME"
+          echo "::set-output name=commit_message::$COMMIT_MESSAGE"
+          echo "::set-output name=author::$AUTHOR"
+          echo "::set-output name=date::$DATE"
+
+      - name: Update Changelog
+        run: |
+          echo "### Version ${{ steps.changelog_info.outputs.date }}" >> CHANGELOG.md
+          echo "- Commit: ${{ steps.changelog_info.outputs.commit_message }}" >> CHANGELOG.md
+          echo "- Author: ${{ steps.changelog_info.outputs.author }}" >> CHANGELOG.md
+          echo "- Branch: ${{ steps.changelog_info.outputs.branch_name }}" >> CHANGELOG.md
+
+      - name: Commit & Push Changelog Updates
+        run: |
+          git add CHANGELOG.md
+          git commit -m "Auto-update changelog for new commit"
+          git push
