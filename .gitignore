@@ -1,6 +1,8 @@
 # Ignore old archive and legacy files
 /archive/
 /legacy/
+/scratch/
+
 
 # Ignore system-specific files
 *.log
