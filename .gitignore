@@ -1,0 +1,27 @@
+# Ignore old archive and legacy files
+/archive/
+/legacy/
+
+# Ignore system-specific files
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Ignore build artifacts
+/build/
+dist/
+node_modules/
+.vscode/
+
+# Ignore any specific IDE/Editor files
+.idea/
+.vscode/
+
+# Ignore any backup files
+*~
+*.bak
+*.swp
+
+# Ignore temporary files created by some tools
+*.swp
