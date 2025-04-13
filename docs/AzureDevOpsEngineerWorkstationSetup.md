@@ -299,4 +299,253 @@ kubectl get services
 curl http://127.0.0.1:<port>
 ```
 
+
+
+# Azure DevOps Engineer Workstation Setup
+
+> ⚙️ Dev Mode Edition — with full port access, DNS tunneling, and proxy hacks included
+
+---
+
+## Changelog
+
+- **2025-04-13 (patch):** Renamed setup doc, removed vestigial versioning, added GitHub version control notes
+- **2025-04-13 (patch):** Added section plans for Hyper-V firewall, DNS tunneling, and autoProxy
+
+---
+
+## 1. Prerequisites
+
+- Windows 11 Pro with WSL2 enabled
+- Ubuntu 22.04 (via WSL)
+- Hyper-V and virtualization enabled in BIOS
+- Admin access
+
+---
+
+## 2. Tooling Versions
+
+| Tool              | Version      |
+|-------------------|--------------|
+| Azure CLI         | 2.59+        |
+| Terraform         | 1.6.x        |
+| Git               | Latest       |
+| kubectl           | 1.29.x       |
+| Helm              | 3.14.x       |
+| Minikube          | 1.33+        |
+| Docker CLI        | 24.x         |
+| Azure Dev CLI     | Latest       |
+| Visual Studio Code| Stable + Extensions |
+
+---
+
+## 3. GitHub Setup for Version Control
+
+```bash
+mkdir -p ~/dev/azure-workstation-setup
+cd ~/dev/azure-workstation-setup
+git init
+git remote add origin git@github.com:<your-username>/azure-workstation-setup.git
+echo "# Azure DevOps Workstation Setup" > README.md
+git add .
+git commit -m "init"
+git push -u origin main
+```
+
+> 📁 Put your `docs/`, `.azure/`, and `.terraform/` examples here.
+
+---
+
+## 4. VS Code Setup
+
+### Extensions
+- Azure Tools
+- Terraform
+- Kubernetes
+- YAML
+- Remote - WSL
+- GitLens
+
+### Validation
+```bash
+code --version
+code-insiders --list-extensions
+```
+
+> 🎨 Customize `settings.json` for formatting, linting, and IntelliSense.
+
+---
+
+## 5. WSL2 Ubuntu Configuration
+
+### Locale and Timezone
+```bash
+sudo dpkg-reconfigure tzdata
+sudo locale-gen en_US.UTF-8
+```
+
+### Base Packages
+```bash
+sudo apt update && sudo apt install -y \
+  build-essential curl wget unzip jq git \
+  dnsutils net-tools gnupg2 lsb-release apt-transport-https
+```
+
+> 🚀 You're now ready to install cloud tooling.
+
+---
+
+## 6. Azure CLI + Terraform Setup
+
+```bash
+curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+az version
+
+# Terraform
+wget https://releases.hashicorp.com/terraform/1.6.6/terraform_1.6.6_linux_amd64.zip
+unzip terraform_1.6.6_linux_amd64.zip
+sudo mv terraform /usr/local/bin/
+terraform version
+```
+
+> 🧪 Test by authenticating: `az login` and `terraform init`
+
+---
+
+## 7. Kubernetes + Minikube Setup (Coming Up)
+
+> 🛠️ We'll dive into this after network setup.
+
+---
+
+## 8. Network Configuration for Dev Mode 🛠️
+
+### Hyper-V Firewall Rules (Wide-Open Dev Mode)
+
+During development, especially with Kubernetes or service mesh workloads, you might need to open up wide ranges of ports temporarily. Here's how to configure this on Windows with Hyper-V-enabled environments:
+
+```powershell
+# Open NodePort range for Kubernetes services (30000–32767)
+New-NetFirewallRule -DisplayName "K8s NodePort Range" -Direction Inbound -LocalPort 30000-32767 -Protocol TCP -Action Allow
+
+# Optional: Allow all TCP/UDP during dev mode (use with caution)
+New-NetFirewallRule -DisplayName "DevMode All TCP" -Direction Inbound -Protocol TCP -Action Allow
+New-NetFirewallRule -DisplayName "DevMode All UDP" -Direction Inbound -Protocol UDP -Action Allow
+```
+
+> 💡 Be sure to remove these rules before moving to production-like setups.
+
+### DNS Tunneling for Custom Resolution
+
+If you're routing DNS manually (e.g., for local clusters or custom domains via `nip.io` or similar), consider running a local DNS proxy with CoreDNS or Dnsmasq:
+
+**WSL2 Setup Example:**
+
+```bash
+sudo apt update && sudo apt install -y dnsmasq
+
+# /etc/dnsmasq.conf
+address=/test.local/127.0.0.1
+listen-address=127.0.0.1
+```
+
+Then configure WSL to use it:
+
+```bash
+echo "nameserver 127.0.0.1" | sudo tee /etc/resolv.conf > /dev/null
+sudo chattr +i /etc/resolv.conf  # Prevent overwrites
+```
+
+### autoProxy Configuration for CLI Tools
+
+For tools like `az`, `terraform`, `kubectl`, or even package managers, set up automatic proxy behavior based on environment:
+
+```bash
+# ~/.bashrc or ~/.zshrc
+export http_proxy=http://127.0.0.1:8888
+export https_proxy=http://127.0.0.1:8888
+export no_proxy=localhost,127.0.0.1,.svc,.local
+
+# Optional: wrap CLI tools to detect when proxy is down
+alias az='PROXY_ON=1 az'
+```
+
+> ✅ Validate with `env | grep proxy` and curl to ensure routing works.
+
+---
+
+Next up: **Minikube setup in Hyper-V with custom DNS and port routing**
+
+
+
+Certainly! Here's the **Minikube Setup in Docker** section in full markdown format:
+
+```markdown
+## 4. Minikube Setup in Docker
+
+To set up **Minikube** in Docker, follow these steps:
+
+### 1. Install Minikube in Docker
+
+First, install Minikube in your WSL2 environment using Docker as the driver:
+
+```bash
+curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+chmod +x minikube
+sudo mv minikube /usr/local/bin
+```
+
+### 2. Start Minikube with Docker Driver
+
+Start Minikube using Docker as the driver:
+
+```bash
+minikube start --driver=docker
+```
+
+This command will initiate a Minikube cluster using Docker as the VM driver for your Kubernetes environment.
+
+### 3. Verify the Minikube Cluster
+
+After Minikube starts, you can verify the cluster's status using:
+
+```bash
+minikube status
+```
+
+This will give you the current status of your Minikube cluster, including information about the Docker container running your Kubernetes setup.
+
+### 4. Accessing Kubernetes with kubectl
+
+To access the Kubernetes cluster, you will need to use `kubectl`. Minikube configures `kubectl` automatically for you. You can verify your connection by running:
+
+```bash
+kubectl cluster-info
+```
+
+This will show details about the Kubernetes control plane and the cluster configuration.
+
+### 5. Stopping Minikube
+
+To stop your Minikube cluster, run:
+
+```bash
+minikube stop
+```
+
+This command stops the Minikube VM (or Docker container in this case) without deleting the cluster.
+
+### 6. Deleting the Minikube Cluster
+
+If you wish to delete the Minikube cluster, run:
+
+```bash
+minikube delete
+```
+
+This will completely remove the Minikube environment, including the Docker container and Kubernetes configuration.
+
+```
+
+This markdown provides the entire process for setting up Minikube using Docker as the driver. Let me know if this works for you!
 ---
