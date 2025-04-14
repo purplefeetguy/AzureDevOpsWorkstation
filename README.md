@@ -133,3 +133,6 @@ This repository is primarily used to update and manage the Azure DevOps workstat
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+## Acknowledgments
+
+This project was developed with assistance from [ChatGPT](https://openai.com/chatgpt), an AI language model by OpenAI, which helped with the documentation, content generation, and development of setup instructions.
