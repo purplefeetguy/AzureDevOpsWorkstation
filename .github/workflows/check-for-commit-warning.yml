@@ -1,0 +1,27 @@
+name: Check Commit Message Warning
+
+on:
+  push:
+    branches:
+      - "*"
+
+jobs:
+  commit-message-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Check Commit Message
+        run: |
+          # Get the commit message
+          commit_message=$(git log -1 --pretty=%B)
+
+          # Check if the commit message contains a valid format for semantic versioning
+          if [[ ! "$commit_message" =~ ^(fix|feat|BREAKING\ CHANGE):\ .+ ]]; then
+            echo "Commit message does not follow the expected semantic versioning format."
+            echo "Please use 'fix:', 'feat:', or 'BREAKING CHANGE:' followed by a description."
+            exit 1
+          fi
+          echo "Commit message is valid."
