@@ -1,0 +1,73 @@
+name: Dynamic Changelog Versioning
+
+on:
+  push:
+    branches:
+      - "*"
+
+jobs:
+  changelog-versioning:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Get Current Version
+        id: get_version
+        run: |
+          # Read the current version from the changelog/CHANGELOG.md file (assuming the version is listed at the top)
+          version=$(head -n 1 changelog/CHANGELOG.md | grep -oP '\d+\.\d+\.\d+')
+          echo "Current version is $version"
+          echo "version=$version" >> $GITHUB_ENV
+
+      - name: Determine Version Increment
+        id: version_increment
+        run: |
+          # Get the latest commit message
+          commit_message=$(git log -1 --pretty=%B)
+
+          # Default to patch version increment
+          increment="patch"
+
+          # Check if it's a breaking change, feature, or fix
+          if [[ $commit_message == *"BREAKING CHANGE"* ]]; then
+            increment="major"
+          elif [[ $commit_message == *"feat"* ]]; then
+            increment="minor"
+          elif [[ $commit_message == *"fix"* ]]; then
+            increment="patch"
+          fi
+
+          echo "Increment type: $increment"
+          echo "increment=$increment" >> $GITHUB_ENV
+
+      - name: Bump Version
+        run: |
+          # Get the current version from the environment variable
+          IFS='.' read -r major minor patch <<< "$version"
+
+          if [[ $increment == "major" ]]; then
+            major=$((major + 1))
+            minor=0
+            patch=0
+          elif [[ $increment == "minor" ]]; then
+            minor=$((minor + 1))
+            patch=0
+          elif [[ $increment == "patch" ]]; then
+            patch=$((patch + 1))
+          fi
+
+          new_version="$major.$minor.$patch"
+          echo "New version: $new_version"
+
+          # Update version in CHANGELOG.md
+          sed -i "1s/.*/$new_version/" changelog/CHANGELOG.md
+
+      - name: Commit & Push Changes
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add changelog/CHANGELOG.md
+          git commit -m "Auto-update changelog for version $new_version"
+          git push origin ${{ github.ref }}
