@@ -2,8 +2,9 @@
 
 ![GitHub last commit](https://img.shields.io/github/last-commit/purplefeetguy/AzureDevOpsWorkstation?style=flat-square)
 ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/purplefeetguy/AzureDevOpsWorkstation/changelog.yml?style=flat-square)
-![Apache License 2.0](https://img.shields.io/github/license/purplefeetguy/AzureDevOpsWorkstation?style=flat-square)
-![GitHub repo size](https://img.shields.io/github/repo-size/purplefeetguy/AzureDevOpsWorkstation?style=flat-square)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+![Issues](https://img.shields.io/github/issues/purplefeetguy/AzureDevOpsWorkstation)
+
 
 This repository contains setup and configuration instructions for preparing a Windows 11 development workstation optimized for Azure DevOps engineering tasks. It focuses on infrastructure-as-code (IaC), automation, and cloud-native tools using WSL2 with Ubuntu.
 
