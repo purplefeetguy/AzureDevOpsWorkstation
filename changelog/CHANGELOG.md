@@ -1,4 +1,4 @@
-0.6.5
+0.6.6
 ### Added
 - New `README.md` with repo purpose and usage instructions
 - LICENSE file with MIT License
